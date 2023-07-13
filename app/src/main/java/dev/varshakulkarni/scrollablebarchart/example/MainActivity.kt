@@ -54,8 +54,8 @@ class MainActivity : ComponentActivity() {
                     BoxWithConstraints() {
                         ScrollableBarChart(
                             chartData,
-//                            chartWidth = constraints.maxWidth - 150f,
-//                            chartHeight = constraints.maxHeight - 64f
+                            chartWidth = constraints.maxWidth - 150f,
+                            chartHeight = constraints.maxHeight - 150f
                         )
                     }
                 }
