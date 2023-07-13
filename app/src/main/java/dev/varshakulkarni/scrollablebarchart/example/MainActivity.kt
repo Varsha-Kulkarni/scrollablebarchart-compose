@@ -18,10 +18,13 @@ package dev.varshakulkarni.scrollablebarchart.example
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import dev.varshakulkarni.scrollablebarchart.ChartData
+import dev.varshakulkarni.scrollablebarchart.ScrollableBarChart
 import dev.varshakulkarni.scrollablebarchart.example.ui.theme.ScrollablebarchartcomposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,6 +37,27 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val chartData = listOf(
+                        ChartData("20", 9000),
+                        ChartData(10, 400),
+                        ChartData(30, 300),
+                        ChartData(40, 8000),
+                        ChartData(50, 8300),
+                        ChartData(70, 12000),
+                        ChartData(80, 200),
+                        ChartData(90, 300),
+                        ChartData(100, 830),
+                        ChartData(110, 600),
+
+                    )
+
+                    BoxWithConstraints() {
+                        ScrollableBarChart(
+                            chartData,
+//                            chartWidth = constraints.maxWidth - 150f,
+//                            chartHeight = constraints.maxHeight - 64f
+                        )
+                    }
                 }
             }
         }

@@ -14,3 +14,199 @@
  * limitations under the License.
  */
 package dev.varshakulkarni.scrollablebarchart
+
+import android.graphics.Paint
+import android.graphics.Rect
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.drawscope.inset
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
+
+const val PADDING_SMALL = 16f
+const val PADDING_MEDIUM = 24f
+const val PADDING_LARGE = 48f
+const val DASH_PATH_ON_INTERVAL = 10f
+const val DASH_PATH_OFF_INTERVAL = 10f
+const val DASH_PATH_PHASE_VALUE = 0f
+
+@Composable
+fun ScrollableBarChart(
+    chartData: List<ChartData>,
+    modifier: Modifier = Modifier,
+    chartColor: Color = MaterialTheme.colorScheme.onBackground,
+    chartBackground: Color = MaterialTheme.colorScheme.background,
+    chartWidth: Float = 900f,
+    chartHeight: Float = 900f,
+    chartStrokeWidth: Float = 2f,
+    barColor: Color = Color.Green,
+    barColorLow: Color = Color.Gray,
+    barWidth: Float = 30f,
+    visibleBarCount: Int = 6,
+    dataTextSize: Float = 35.sp.value,
+    yLineStrokeWidth: Float = 1f,
+    yLinesCount: Int = 2,
+    target: Int = 6000,
+    horizontalInset: Float = 40.dp.value,
+    verticalInset: Float = 40.dp.value
+) {
+    var scrollOffset by remember { mutableStateOf(chartData.size.toFloat() - visibleBarCount) }
+    val scrollableState = ScrollableState {
+        scrollOffset = if (it > 0) {
+            (scrollOffset - it * visibleBarCount.toFloat() / chartWidth).coerceAtLeast(0f)
+        } else {
+            (scrollOffset - it * visibleBarCount.toFloat() / chartWidth).coerceAtMost(
+                chartData.lastIndex.toFloat() - (visibleBarCount.toFloat() - 1)
+            )
+        }
+        it
+    }
+
+    val visibleBars by remember {
+        derivedStateOf {
+            if (chartData.isNotEmpty()) {
+                chartData.subList(
+                    scrollOffset.roundToInt().coerceAtLeast(0),
+                    (scrollOffset.roundToInt() + visibleBarCount).coerceAtMost(chartData.size)
+                )
+            } else {
+                emptyList()
+            }
+        }
+    }
+
+    fun xOffset(chartData: ChartData) =
+        chartWidth * visibleBars.indexOf(chartData) / visibleBarCount
+
+    val bounds = Rect()
+    val textPaint = Paint().apply {
+        isAntiAlias = true
+        textSize = dataTextSize
+        color = chartColor.toArgb()
+        textAlign = Paint.Align.CENTER
+    }
+
+    val maxY = chartData.maxWith(Comparator.comparingInt { it.yValue as Int })
+    val scaleFactor =
+        if (target > maxY.yValue.toInt()) (chartHeight - verticalInset) / target else (chartHeight - verticalInset) / maxY.yValue.toInt()
+    val yLineItem = target / yLinesCount
+    val yLines = mutableListOf<Int>().apply {
+        repeat(yLinesCount) {
+            if (it >= 0) add(target - yLineItem * it)
+        }
+    }
+
+    Canvas(
+        modifier = modifier
+            .fillMaxSize()
+            .background(chartBackground)
+            .scrollable(scrollableState, Orientation.Horizontal)
+    ) {
+        inset(horizontal = horizontalInset, vertical = verticalInset) {
+            drawLine(
+                color = chartColor,
+                strokeWidth = chartStrokeWidth,
+                start = Offset(0f, chartHeight),
+                end = Offset(chartWidth, chartHeight)
+            )
+            drawLine(
+                color = chartColor,
+                strokeWidth = chartStrokeWidth,
+                start = Offset(chartWidth, 0f),
+                end = Offset(chartWidth, chartHeight)
+            )
+
+            yLines.forEach { value: Int ->
+                drawLine(
+                    color = chartColor,
+                    strokeWidth = yLineStrokeWidth,
+                    start = Offset(chartWidth, chartHeight - value.toFloat() * scaleFactor),
+                    end = Offset(0f, chartHeight - value.toFloat() * scaleFactor),
+                    pathEffect = PathEffect.dashPathEffect(
+                        intervals = floatArrayOf(DASH_PATH_ON_INTERVAL, DASH_PATH_OFF_INTERVAL),
+                        phase = DASH_PATH_PHASE_VALUE
+                    )
+                )
+                drawIntoCanvas {
+                    val text = value.toString()
+                    textPaint.getTextBounds(text, 0, text.length, bounds)
+                    it.nativeCanvas.drawText(
+                        text,
+                        chartWidth + PADDING_LARGE,
+                        chartHeight - value.toFloat() * scaleFactor + bounds.height() / 2,
+                        textPaint
+                    )
+                }
+            }
+
+            visibleBars.forEach { bar ->
+                val xOffset = xOffset(bar)
+                if (bar.yValue.toInt() >= target) {
+                    drawRoundRect(
+                        color = barColor,
+                        topLeft = Offset(
+                            xOffset,
+                            chartHeight - bar.yValue.toFloat() * scaleFactor
+                        ),
+                        size = Size(barWidth, bar.yValue.toFloat() * scaleFactor),
+                        cornerRadius = CornerRadius(10f, 10f)
+                    )
+                } else {
+                    drawRoundRect(
+                        color = barColorLow,
+                        topLeft = Offset(
+                            xOffset,
+                            chartHeight - bar.yValue.toFloat() * scaleFactor
+                        ),
+                        size = Size(barWidth, bar.yValue.toFloat() * scaleFactor),
+                        cornerRadius = CornerRadius(10f, 10f)
+                    )
+                }
+                if (bar.yValue != 0) {
+                    drawIntoCanvas {
+                        val text = bar.yValue.toString()
+                        textPaint.getTextBounds(text, 0, text.length, bounds)
+                        it.nativeCanvas.drawText(
+                            text,
+                            xOffset + barWidth / 2,
+                            chartHeight - PADDING_SMALL - bar.yValue.toFloat() * scaleFactor,
+                            textPaint
+                        )
+                    }
+                }
+                drawIntoCanvas {
+                    val text = "${bar.xValue}"
+                    textPaint.getTextBounds(text, 0, text.length, bounds)
+                    val textHeight = bounds.height()
+                    it.nativeCanvas.drawText(
+                        text,
+                        xOffset + barWidth / 2,
+                        chartHeight + PADDING_MEDIUM + textHeight / 2,
+                        textPaint
+                    )
+                }
+            }
+        }
+    }
+}
