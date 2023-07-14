@@ -17,6 +17,9 @@ package dev.varshakulkarni.scrollablebarchart
 
 import android.graphics.Paint
 import android.graphics.Rect
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -25,6 +28,7 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,7 +73,8 @@ fun ScrollableBarChart(
     yLinesCount: Int = 2,
     target: Int = 6000,
     horizontalInset: Float = 40.dp.value,
-    verticalInset: Float = 40.dp.value
+    verticalInset: Float = 40.dp.value,
+    isAnimated: Boolean = true,
 ) {
     var scrollOffset by remember { mutableStateOf(chartData.size.toFloat() - visibleBarCount) }
     val scrollableState = ScrollableState {
@@ -99,6 +104,9 @@ fun ScrollableBarChart(
     fun xOffset(chartData: ChartData) =
         chartWidth * visibleBars.indexOf(chartData) / visibleBarCount
 
+    val animatableBar = remember { Animatable(0f) }
+    val animateFactor = if (isAnimated) animatableBar.value else 1f
+
     val bounds = Rect()
     val textPaint = Paint().apply {
         isAntiAlias = true
@@ -115,6 +123,13 @@ fun ScrollableBarChart(
         repeat(yLinesCount) {
             if (it >= 0) add(target - yLineItem * it)
         }
+    }
+
+    LaunchedEffect(animatableBar) {
+        animatableBar.animateTo(
+            1f,
+            animationSpec = tween(400, easing = LinearEasing)
+        )
     }
 
     Canvas(
@@ -167,9 +182,9 @@ fun ScrollableBarChart(
                         color = barColor,
                         topLeft = Offset(
                             xOffset,
-                            chartHeight - bar.yValue.toFloat() * scaleFactor
+                            chartHeight - bar.yValue.toFloat() * scaleFactor * animateFactor
                         ),
-                        size = Size(barWidth, bar.yValue.toFloat() * scaleFactor),
+                        size = Size(barWidth, bar.yValue.toFloat() * scaleFactor * animateFactor),
                         cornerRadius = CornerRadius(10f, 10f)
                     )
                 } else {
@@ -177,9 +192,9 @@ fun ScrollableBarChart(
                         color = barColorLow,
                         topLeft = Offset(
                             xOffset,
-                            chartHeight - bar.yValue.toFloat() * scaleFactor
+                            chartHeight - bar.yValue.toFloat() * scaleFactor * animateFactor
                         ),
-                        size = Size(barWidth, bar.yValue.toFloat() * scaleFactor),
+                        size = Size(barWidth, bar.yValue.toFloat() * scaleFactor * animateFactor),
                         cornerRadius = CornerRadius(10f, 10f)
                     )
                 }
