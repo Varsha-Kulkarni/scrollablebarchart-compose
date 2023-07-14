@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val chartData = listOf(
-                        ChartData("20", 9000),
+                        ChartData(20, 9000),
                         ChartData(10, 400),
                         ChartData(30, 300),
                         ChartData(40, 8000),
