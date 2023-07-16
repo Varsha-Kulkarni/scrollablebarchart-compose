@@ -17,6 +17,7 @@ package dev.varshakulkarni.scrollablebarchart
 
 import android.graphics.Paint
 import android.graphics.Rect
+import android.view.MotionEvent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -34,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -44,6 +46,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
@@ -55,6 +58,7 @@ const val DASH_PATH_ON_INTERVAL = 10f
 const val DASH_PATH_OFF_INTERVAL = 10f
 const val DASH_PATH_PHASE_VALUE = 0f
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ScrollableBarChart(
     chartData: List<ChartData>,
@@ -107,6 +111,10 @@ fun ScrollableBarChart(
     val animatableBar = remember { Animatable(0f) }
     val animateFactor = if (isAnimated) animatableBar.value else 1f
 
+    var showBarLabels by remember {
+        mutableStateOf(false)
+    }
+
     val bounds = Rect()
     val textPaint = Paint().apply {
         isAntiAlias = true
@@ -137,6 +145,18 @@ fun ScrollableBarChart(
             .fillMaxSize()
             .background(chartBackground)
             .scrollable(scrollableState, Orientation.Horizontal)
+            .pointerInteropFilter {
+                when (it.action) {
+                    MotionEvent.ACTION_UP -> {
+                        showBarLabels = !showBarLabels
+                        false
+                    }
+
+                    else -> {
+                        true
+                    }
+                }
+            }
     ) {
         inset(horizontal = horizontalInset, vertical = verticalInset) {
             drawLine(
@@ -198,7 +218,7 @@ fun ScrollableBarChart(
                         cornerRadius = CornerRadius(10f, 10f)
                     )
                 }
-                if (bar.yValue != 0) {
+                if (bar.yValue != 0 && showBarLabels) {
                     drawIntoCanvas {
                         val text = bar.yValue.toString()
                         textPaint.getTextBounds(text, 0, text.length, bounds)
