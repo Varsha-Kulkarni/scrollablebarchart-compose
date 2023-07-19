@@ -55,12 +55,81 @@ const val PADDING_SMALL = 16f
 const val PADDING_MEDIUM = 24f
 const val PADDING_LARGE = 48f
 const val DASH_PATH_ON_INTERVAL = 10f
-const val DASH_PATH_OFF_INTERVAL = 10f
+const val DASH_PATH_OFF_INTERVAL = 4f
 const val DASH_PATH_PHASE_VALUE = 0f
+
+@Composable
+fun ScrollableBarChart(
+    chartData: List<ChartData>,
+    modifier: Modifier = Modifier,
+    chartColor: Color = MaterialTheme.colorScheme.onBackground,
+    chartBackground: Color = MaterialTheme.colorScheme.background,
+    chartWidth: Float = 900.dp.value,
+    chartHeight: Float = 900.dp.value,
+    chartDirection: ChartDirection = ChartDirection.RIGHT_TO_LEFT,
+    chartStrokeWidth: Float = 2f,
+    barColor: Color = Color.Green,
+    barColorLow: Color = Color.Gray,
+    barWidth: Float = 30f,
+    visibleBarCount: Int = 6,
+    dataTextSize: Float = 35.sp.value,
+    yLineStrokeWidth: Float = 1f,
+    yLinesCount: Int = 2,
+    target: Int = 6000,
+    horizontalInset: Float = 40.dp.value,
+    verticalInset: Float = 40.dp.value,
+    isAnimated: Boolean = true,
+) {
+    val scrollInit: Float
+    val xPos: Float
+    val barOffset: Float
+    val yAxisXOffset: Float
+    val xAxisYOffset: Float
+
+    if (chartDirection == ChartDirection.LEFT_TO_RIGHT) {
+        scrollInit = 0f
+        xPos = 0f + PADDING_LARGE
+        barOffset = chartWidth / visibleBarCount
+        yAxisXOffset = 0f
+        xAxisYOffset = chartWidth + barWidth
+    } else {
+        scrollInit = chartData.size.toFloat() - visibleBarCount
+        xPos = chartWidth - PADDING_LARGE
+        barOffset = 0f
+        yAxisXOffset = chartWidth
+        xAxisYOffset = chartWidth
+    }
+
+    DrawChart(
+        chartData = chartData,
+        modifier = modifier,
+        chartColor = chartColor,
+        chartBackground = chartBackground,
+        chartWidth = chartWidth,
+        chartHeight = chartHeight,
+        chartStrokeWidth = chartStrokeWidth,
+        barColor = barColor,
+        barColorLow = barColorLow,
+        barWidth = barWidth,
+        visibleBarCount = visibleBarCount,
+        dataTextSize = dataTextSize,
+        yLineStrokeWidth = yLineStrokeWidth,
+        yLinesCount = yLinesCount,
+        target = target,
+        horizontalInset = horizontalInset,
+        verticalInset = verticalInset,
+        isAnimated = isAnimated,
+        scrollInit = scrollInit,
+        xPos = xPos,
+        barOffset = barOffset,
+        yAxisXOffset = yAxisXOffset,
+        xAxisYOffset = xAxisYOffset
+    )
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ScrollableBarChart(
+private fun DrawChart(
     chartData: List<ChartData>,
     modifier: Modifier = Modifier,
     chartColor: Color = MaterialTheme.colorScheme.onBackground,
@@ -79,8 +148,13 @@ fun ScrollableBarChart(
     horizontalInset: Float = 40.dp.value,
     verticalInset: Float = 40.dp.value,
     isAnimated: Boolean = true,
+    scrollInit: Float,
+    xPos: Float,
+    barOffset: Float,
+    yAxisXOffset: Float,
+    xAxisYOffset: Float
 ) {
-    var scrollOffset by remember { mutableStateOf(chartData.size.toFloat() - visibleBarCount) }
+    var scrollOffset by remember { mutableStateOf(scrollInit) }
     val scrollableState = ScrollableState {
         scrollOffset = if (it > 0) {
             (scrollOffset - it * visibleBarCount.toFloat() / chartWidth).coerceAtLeast(0f)
@@ -108,9 +182,6 @@ fun ScrollableBarChart(
     fun xOffset(chartData: ChartData) =
         chartWidth * visibleBars.indexOf(chartData) / visibleBarCount
 
-    val animatableBar = remember { Animatable(0f) }
-    val animateFactor = if (isAnimated) animatableBar.value else 1f
-
     var showBarLabels by remember {
         mutableStateOf(false)
     }
@@ -132,6 +203,9 @@ fun ScrollableBarChart(
             if (it >= 0) add(target - yLineItem * it)
         }
     }
+
+    val animatableBar = remember { Animatable(0f) }
+    val animateFactor = if (isAnimated) animatableBar.value else 1f
 
     LaunchedEffect(animatableBar) {
         animatableBar.animateTo(
@@ -163,21 +237,21 @@ fun ScrollableBarChart(
                 color = chartColor,
                 strokeWidth = chartStrokeWidth,
                 start = Offset(0f, chartHeight),
-                end = Offset(chartWidth, chartHeight)
+                end = Offset(xAxisYOffset, chartHeight)
             )
             drawLine(
                 color = chartColor,
                 strokeWidth = chartStrokeWidth,
-                start = Offset(chartWidth, 0f),
-                end = Offset(chartWidth, chartHeight)
+                start = Offset(yAxisXOffset, 0f),
+                end = Offset(yAxisXOffset, chartHeight)
             )
 
             yLines.forEach { value: Int ->
                 drawLine(
                     color = chartColor,
                     strokeWidth = yLineStrokeWidth,
-                    start = Offset(chartWidth, chartHeight - value.toFloat() * scaleFactor),
-                    end = Offset(0f, chartHeight - value.toFloat() * scaleFactor),
+                    start = Offset(0f, chartHeight - value.toFloat() * scaleFactor),
+                    end = Offset(xAxisYOffset, chartHeight - value.toFloat() * scaleFactor),
                     pathEffect = PathEffect.dashPathEffect(
                         intervals = floatArrayOf(DASH_PATH_ON_INTERVAL, DASH_PATH_OFF_INTERVAL),
                         phase = DASH_PATH_PHASE_VALUE
@@ -188,8 +262,8 @@ fun ScrollableBarChart(
                     textPaint.getTextBounds(text, 0, text.length, bounds)
                     it.nativeCanvas.drawText(
                         text,
-                        chartWidth + PADDING_LARGE,
-                        chartHeight - value.toFloat() * scaleFactor + bounds.height() / 2,
+                        xPos,
+                        chartHeight - value.toFloat() * scaleFactor - bounds.height() / 2,
                         textPaint
                     )
                 }
@@ -201,7 +275,7 @@ fun ScrollableBarChart(
                     drawRoundRect(
                         color = barColor,
                         topLeft = Offset(
-                            xOffset,
+                            xOffset + barOffset,
                             chartHeight - bar.yValue.toFloat() * scaleFactor * animateFactor
                         ),
                         size = Size(barWidth, bar.yValue.toFloat() * scaleFactor * animateFactor),
@@ -211,8 +285,9 @@ fun ScrollableBarChart(
                     drawRoundRect(
                         color = barColorLow,
                         topLeft = Offset(
-                            xOffset,
+                            xOffset + barOffset,
                             chartHeight - bar.yValue.toFloat() * scaleFactor * animateFactor
+
                         ),
                         size = Size(barWidth, bar.yValue.toFloat() * scaleFactor * animateFactor),
                         cornerRadius = CornerRadius(10f, 10f)
@@ -224,7 +299,7 @@ fun ScrollableBarChart(
                         textPaint.getTextBounds(text, 0, text.length, bounds)
                         it.nativeCanvas.drawText(
                             text,
-                            xOffset + barWidth / 2,
+                            xOffset + barOffset + barWidth / 2,
                             chartHeight - PADDING_SMALL - bar.yValue.toFloat() * scaleFactor,
                             textPaint
                         )
@@ -236,7 +311,7 @@ fun ScrollableBarChart(
                     val textHeight = bounds.height()
                     it.nativeCanvas.drawText(
                         text,
-                        xOffset + barWidth / 2,
+                        xOffset + barOffset + barWidth / 2,
                         chartHeight + PADDING_MEDIUM + textHeight / 2,
                         textPaint
                     )
