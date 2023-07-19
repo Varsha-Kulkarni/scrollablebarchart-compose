@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import dev.varshakulkarni.scrollablebarchart.ChartData
 import dev.varshakulkarni.scrollablebarchart.ScrollableBarChart
 import dev.varshakulkarni.scrollablebarchart.example.ui.theme.ScrollablebarchartcomposeTheme
@@ -47,15 +48,21 @@ class MainActivity : ComponentActivity() {
                         ChartData(80, 200),
                         ChartData(90, 300),
                         ChartData(100, 830),
-                        ChartData(110, 600),
-
+                        ChartData(120, 600),
+                        ChartData(130, 600),
+                        ChartData(140, 600),
+                        ChartData(150, 600),
+                        ChartData(160, 600),
+                        ChartData(170, 600),
+                        ChartData(180, 600),
+                        ChartData(190, 600),
                     )
 
                     BoxWithConstraints() {
                         ScrollableBarChart(
                             chartData,
-                            chartWidth = constraints.maxWidth - 150f,
-                            chartHeight = constraints.maxHeight - 150f
+                            chartWidth = constraints.maxWidth.dp.value - 150.dp.value,
+                            chartHeight = constraints.maxHeight.dp.value - 150.dp.value
                         )
                     }
                 }
