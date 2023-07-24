@@ -22,7 +22,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.scrollable
@@ -47,13 +46,13 @@ import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
 
 const val PADDING_SMALL = 16f
 const val PADDING_MEDIUM = 24f
-const val PADDING_LARGE = 48f
 const val DASH_PATH_ON_INTERVAL = 10f
 const val DASH_PATH_OFF_INTERVAL = 4f
 const val DASH_PATH_PHASE_VALUE = 0f
@@ -62,12 +61,11 @@ const val DASH_PATH_PHASE_VALUE = 0f
 fun ScrollableBarChart(
     chartData: List<ChartData>,
     modifier: Modifier = Modifier,
-    chartColor: Color = MaterialTheme.colorScheme.onBackground,
-    chartBackground: Color = MaterialTheme.colorScheme.background,
-    chartWidth: Float = 900.dp.value,
-    chartHeight: Float = 900.dp.value,
-    chartDirection: ChartDirection = ChartDirection.RIGHT_TO_LEFT,
+    chartWidth: Float = with(LocalContext.current) { resources.displayMetrics.widthPixels.toFloat() },
+    chartHeight: Float = with(LocalContext.current) { resources.displayMetrics.heightPixels.toFloat() },
+    chartDirection: ChartDirection = ChartDirection.LEFT_TO_RIGHT,
     chartStrokeWidth: Float = 2f,
+    chartColor: Color = MaterialTheme.colorScheme.onBackground,
     barColor: Color = Color.Green,
     barColorLow: Color = Color.Gray,
     barWidth: Float = 30f,
@@ -75,39 +73,60 @@ fun ScrollableBarChart(
     dataTextSize: Float = 35.sp.value,
     yLineStrokeWidth: Float = 1f,
     yLinesCount: Int = 2,
-    target: Int = 6000,
+    target: Number = 8000,
     horizontalInset: Float = 40.dp.value,
     verticalInset: Float = 40.dp.value,
     isAnimated: Boolean = true,
 ) {
     val scrollInit: Float
-    val xPos: Float
     val barOffset: Float
     val yAxisXOffset: Float
     val xAxisYOffset: Float
+    val data: List<ChartData>
+    val hInset: Float
+    val width: Float
+    val height: Float
+    val yLabelXPos: Float
+
+    val bounds = Rect()
+    val textPaint = Paint().apply {
+        isAntiAlias = true
+        textSize = dataTextSize
+        color = chartColor.toArgb()
+        textAlign = Paint.Align.CENTER
+    }
+    val text = target.toString()
+    textPaint.getTextBounds(text, 0, text.length, bounds)
 
     if (chartDirection == ChartDirection.LEFT_TO_RIGHT) {
+        hInset = horizontalInset + bounds.width()
+        width = chartWidth * 8 / 9 - hInset
+        height = chartHeight * 9 / 10 - verticalInset
+        data = chartData
         scrollInit = 0f
-        xPos = 0f + PADDING_LARGE
-        barOffset = chartWidth / visibleBarCount
+        barOffset = width / visibleBarCount
         yAxisXOffset = 0f
-        xAxisYOffset = chartWidth + barWidth
+        xAxisYOffset = width + barWidth
+        yLabelXPos = 0f - bounds.width().toFloat() / 2 - PADDING_MEDIUM
     } else {
+        data = chartData.reversed()
+        hInset = horizontalInset
+        width = chartWidth * 8 / 9 - bounds.width()
+        height = chartHeight * 9 / 10 - verticalInset
         scrollInit = chartData.size.toFloat() - visibleBarCount
-        xPos = chartWidth - PADDING_LARGE
         barOffset = 0f
-        yAxisXOffset = chartWidth
-        xAxisYOffset = chartWidth
+        yAxisXOffset = width
+        xAxisYOffset = width
+        yLabelXPos = width + bounds.width() * 3 / 4
     }
 
-    DrawChart(
-        chartData = chartData,
+    ChartContent(
+        chartData = data,
         modifier = modifier,
-        chartColor = chartColor,
-        chartBackground = chartBackground,
-        chartWidth = chartWidth,
-        chartHeight = chartHeight,
+        chartWidth = width,
+        chartHeight = height,
         chartStrokeWidth = chartStrokeWidth,
+        chartColor = chartColor,
         barColor = barColor,
         barColorLow = barColorLow,
         barWidth = barWidth,
@@ -116,38 +135,37 @@ fun ScrollableBarChart(
         yLineStrokeWidth = yLineStrokeWidth,
         yLinesCount = yLinesCount,
         target = target,
-        horizontalInset = horizontalInset,
+        horizontalInset = hInset,
         verticalInset = verticalInset,
         isAnimated = isAnimated,
         scrollInit = scrollInit,
-        xPos = xPos,
+        xPos = yLabelXPos,
         barOffset = barOffset,
         yAxisXOffset = yAxisXOffset,
-        xAxisYOffset = xAxisYOffset
+        xAxisYOffset = xAxisYOffset,
     )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun DrawChart(
+private fun ChartContent(
     chartData: List<ChartData>,
-    modifier: Modifier = Modifier,
-    chartColor: Color = MaterialTheme.colorScheme.onBackground,
-    chartBackground: Color = MaterialTheme.colorScheme.background,
-    chartWidth: Float = 900f,
-    chartHeight: Float = 900f,
-    chartStrokeWidth: Float = 2f,
-    barColor: Color = Color.Green,
-    barColorLow: Color = Color.Gray,
-    barWidth: Float = 30f,
-    visibleBarCount: Int = 6,
-    dataTextSize: Float = 35.sp.value,
-    yLineStrokeWidth: Float = 1f,
-    yLinesCount: Int = 2,
-    target: Int = 6000,
-    horizontalInset: Float = 40.dp.value,
-    verticalInset: Float = 40.dp.value,
-    isAnimated: Boolean = true,
+    modifier: Modifier,
+    chartColor: Color,
+    chartWidth: Float,
+    chartHeight: Float,
+    chartStrokeWidth: Float,
+    barColor: Color,
+    barColorLow: Color,
+    barWidth: Float,
+    visibleBarCount: Int,
+    dataTextSize: Float,
+    yLineStrokeWidth: Float,
+    yLinesCount: Int,
+    target: Number,
+    horizontalInset: Float,
+    verticalInset: Float,
+    isAnimated: Boolean,
     scrollInit: Float,
     xPos: Float,
     barOffset: Float,
@@ -155,6 +173,7 @@ private fun DrawChart(
     xAxisYOffset: Float
 ) {
     var scrollOffset by remember { mutableStateOf(scrollInit) }
+
     val scrollableState = ScrollableState {
         scrollOffset = if (it > 0) {
             (scrollOffset - it * visibleBarCount.toFloat() / chartWidth).coerceAtLeast(0f)
@@ -194,13 +213,13 @@ private fun DrawChart(
         textAlign = Paint.Align.CENTER
     }
 
-    val maxY = chartData.maxWith(Comparator.comparingInt { it.yValue as Int })
+    val maxY = chartData.maxWith(Comparator.comparing { it.yValue.toFloat() })
     val scaleFactor =
-        if (target > maxY.yValue.toInt()) (chartHeight - verticalInset) / target else (chartHeight - verticalInset) / maxY.yValue.toInt()
-    val yLineItem = target / yLinesCount
-    val yLines = mutableListOf<Int>().apply {
+        if (target.toFloat() > maxY.yValue.toFloat()) (chartHeight - verticalInset) / target.toFloat() else (chartHeight - verticalInset) / maxY.yValue.toFloat()
+    val yLineItem = target.toFloat() / yLinesCount
+    val yLines = mutableListOf<Float>().apply {
         repeat(yLinesCount) {
-            if (it >= 0) add(target - yLineItem * it)
+            if (it >= 0) add(target.toFloat() - yLineItem * it)
         }
     }
 
@@ -217,7 +236,6 @@ private fun DrawChart(
     Canvas(
         modifier = modifier
             .fillMaxSize()
-            .background(chartBackground)
             .scrollable(scrollableState, Orientation.Horizontal)
             .pointerInteropFilter {
                 when (it.action) {
@@ -237,21 +255,21 @@ private fun DrawChart(
                 color = chartColor,
                 strokeWidth = chartStrokeWidth,
                 start = Offset(0f, chartHeight),
-                end = Offset(xAxisYOffset, chartHeight)
+                end = Offset(xAxisYOffset, chartHeight),
             )
             drawLine(
                 color = chartColor,
                 strokeWidth = chartStrokeWidth,
                 start = Offset(yAxisXOffset, 0f),
-                end = Offset(yAxisXOffset, chartHeight)
+                end = Offset(yAxisXOffset, chartHeight),
             )
 
-            yLines.forEach { value: Int ->
+            yLines.forEach { value: Float ->
                 drawLine(
                     color = chartColor,
                     strokeWidth = yLineStrokeWidth,
-                    start = Offset(0f, chartHeight - value.toFloat() * scaleFactor),
-                    end = Offset(xAxisYOffset, chartHeight - value.toFloat() * scaleFactor),
+                    start = Offset(0f, chartHeight - value * scaleFactor),
+                    end = Offset(xAxisYOffset, chartHeight - value * scaleFactor),
                     pathEffect = PathEffect.dashPathEffect(
                         intervals = floatArrayOf(DASH_PATH_ON_INTERVAL, DASH_PATH_OFF_INTERVAL),
                         phase = DASH_PATH_PHASE_VALUE
@@ -263,7 +281,7 @@ private fun DrawChart(
                     it.nativeCanvas.drawText(
                         text,
                         xPos,
-                        chartHeight - value.toFloat() * scaleFactor - bounds.height() / 2,
+                        chartHeight - value * scaleFactor + bounds.height() / 2,
                         textPaint
                     )
                 }
@@ -271,7 +289,7 @@ private fun DrawChart(
 
             visibleBars.forEach { bar ->
                 val xOffset = xOffset(bar)
-                if (bar.yValue.toInt() >= target) {
+                if (bar.yValue.toDouble() >= target.toDouble()) {
                     drawRoundRect(
                         color = barColor,
                         topLeft = Offset(

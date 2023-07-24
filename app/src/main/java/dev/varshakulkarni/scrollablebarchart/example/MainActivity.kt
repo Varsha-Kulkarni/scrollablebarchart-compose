@@ -39,9 +39,9 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val chartData = listOf(
-                        ChartData(20, 9000),
                         ChartData(10, 400),
-                        ChartData(30, 300),
+                        ChartData(20, 9000),
+                        ChartData(30, 10000),
                         ChartData(40, 8000),
                         ChartData(50, 8300),
                         ChartData(70, 12000),
@@ -61,8 +61,9 @@ class MainActivity : ComponentActivity() {
                     BoxWithConstraints() {
                         ScrollableBarChart(
                             chartData,
-                            chartWidth = constraints.maxWidth.dp.value - 150.dp.value,
-                            chartHeight = constraints.maxHeight.dp.value - 150.dp.value
+                            chartWidth = constraints.maxWidth.dp.value,
+                            chartHeight = constraints.maxHeight.dp.value
+
                         )
                     }
                 }
