@@ -19,14 +19,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.varshakulkarni.scrollablebarchart.ChartData
-import dev.varshakulkarni.scrollablebarchart.ScrollableBarChart
+import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
 import dev.varshakulkarni.scrollablebarchart.example.ui.theme.ScrollablebarchartcomposeTheme
+import dev.varshakulkarni.scrollablebarchart.ui.chart.LTRScrollableBarChart
+import dev.varshakulkarni.scrollablebarchart.ui.chart.RTLScrollableBarChart
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,32 +44,30 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val chartData = listOf(
-                        ChartData(10, 400),
-                        ChartData(20, 9000),
-                        ChartData(30, 10000),
-                        ChartData(40, 8000),
-                        ChartData(50, 8300),
-                        ChartData(70, 12000),
-                        ChartData(80, 200),
-                        ChartData(90, 300),
-                        ChartData(100, 830),
-                        ChartData(120, 600),
-                        ChartData(130, 600),
-                        ChartData(140, 600),
-                        ChartData(150, 600),
-                        ChartData(160, 600),
-                        ChartData(170, 600),
-                        ChartData(180, 600),
-                        ChartData(190, 600),
+                        ChartData(100, 1f),
+                        ChartData(110, 2f),
+                        ChartData(120, 8f),
+                        ChartData(130, 3f),
+                        ChartData(140, 5f),
+                        ChartData(150, 6f),
+                        ChartData(160, 9f),
+                        ChartData(170, 4f),
+                        ChartData(180, 3f),
+                        ChartData(190, 6f),
+                        ChartData(200, 6f)
                     )
 
                     BoxWithConstraints() {
-                        ScrollableBarChart(
-                            chartData,
-                            chartWidth = constraints.maxWidth.dp.value,
-                            chartHeight = constraints.maxHeight.dp.value
-
-                        )
+                        Column(Modifier.padding(SPACING_MEDIUM.dp)) {
+                            Text("Left to Right scroll")
+                            LTRScrollableBarChart(
+                                chartData, chartWidth = 600f, chartHeight = 600f
+                            )
+                            Text("Right to Left scroll")
+                            RTLScrollableBarChart(
+                                chartData, chartWidth = 600f, chartHeight = 600f
+                            )
+                        }
                     }
                 }
             }
