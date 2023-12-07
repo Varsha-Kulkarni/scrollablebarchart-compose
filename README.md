@@ -24,12 +24,13 @@ val chartData = listOf( ChartData(10, 400),
   <td> 
     
 ```
-ScrollableBarChart(chartData)
+LTRScrollableBarChart(chartData = chartData,
+                      chartSize = ChartDefaults.chartSize(600.dp, 500.dp))
 ```
 
 </td>
 <td> 
-  <img src="/assets/chart_left-to-right.gif" width="260">
+  <img src="/assets/ltr.gif" width="260">
 </td>
 
 </tr>
@@ -37,12 +38,12 @@ ScrollableBarChart(chartData)
   <td>
     
 ```
-ScrollableBarChart( chartData,
-                    chartDirection = ChartDirection.RIGHT_TO_LEFT)
+RTLScrollableBarChart(chartData = chartData,
+                      chartSize = ChartDefaults.chartSize(600.dp, 500.dp))
 ```
 </td>
-  <img src="/assets/chart_right_to_left.gif" width="260">
 <td> 
+  <img src="/assets/rtl.gif" width="260">
 </td>
 
 </tr>
