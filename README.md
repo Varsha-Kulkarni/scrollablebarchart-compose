@@ -5,16 +5,19 @@ Simple customizable scrollable bar chart library which was built using Jetpack C
 ## Usage
 Sample Data
 ```
-val chartData = listOf( ChartData(10, 400),
-                        ChartData(20, 900),
-                        ChartData(30, 300),
-                        ChartData(40, 8000),
-                        ChartData(50, 8300),
-                        ChartData(70, 12000),
-                        ChartData(80, 200),
-                        ChartData(90, 300),
-                        ChartData(100, 830),
-                        ChartData(120, 600))
+val chartData = listOf(
+                        ChartData(10, 1f),
+                        ChartData(11, 2f),
+                        ChartData(12, 8f),
+                        ChartData(13, 3f),
+                        ChartData(14, 5f),
+                        ChartData(15, 6f),
+                        ChartData(16, 9f),
+                        ChartData(17, 4f),
+                        ChartData(18, 3f),
+                        ChartData(19, 6f),
+                        ChartData(20, 6f)
+                    )
 ```
 <table>
 <tr>
