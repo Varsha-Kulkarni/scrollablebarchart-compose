@@ -17,52 +17,52 @@ package dev.varshakulkarni.scrollablebarchart.ui.chart
 
 import android.graphics.Paint
 import android.graphics.Rect
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
+import dev.varshakulkarni.scrollablebarchart.ChartColors
 import dev.varshakulkarni.scrollablebarchart.ChartContent
 import dev.varshakulkarni.scrollablebarchart.ChartData
+import dev.varshakulkarni.scrollablebarchart.ChartDefaults
+import dev.varshakulkarni.scrollablebarchart.ChartSize
+import dev.varshakulkarni.scrollablebarchart.SPACING_LARGE
 import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
+import dev.varshakulkarni.scrollablebarchart.utils.ComposeImmutableList
 
 @Composable
 fun LTRScrollableBarChart(
-    chartData: List<ChartData>,
+    chartData: ComposeImmutableList<ChartData>,
     modifier: Modifier = Modifier,
-    chartWidth: Float = with(LocalContext.current) { resources.displayMetrics.widthPixels.toFloat() },
-    chartHeight: Float = with(LocalContext.current) { resources.displayMetrics.heightPixels.toFloat() },
-    chartStrokeWidth: Float = 2f,
-    chartColor: Color = MaterialTheme.colorScheme.onBackground,
-    barColor: Color = Color.Green,
-    barColorLow: Color = Color.Gray,
-    barWidth: Float = 30f,
-    visibleBarCount: Int = 6,
-    dataTextSize: Float = 35.sp.value,
-    yLineStrokeWidth: Float = 1f,
-    yLinesCount: Int = 4,
-    target: Number = 8,
-    horizontalInset: Float = 24f,
-    verticalInset: Float = 24f,
-    isAnimated: Boolean = true,
+    chartSize: ChartSize = ChartDefaults.chartSize(),
+    chartStrokeWidth: Dp = ChartDefaults.ChartStrokeWidth,
+    barWidth: Dp = ChartDefaults.BarWidth,
+    barCornerRadius: CornerRadius = ChartDefaults.BarCornerRadius,
+    yLineStrokeWidth: Dp = ChartDefaults.YLineStrokeWidth,
+    verticalInset: Dp = ChartDefaults.VerticalInset,
+    chartColors: ChartColors = ChartDefaults.chartColors(),
+    dataTextSize: TextUnit = ChartDefaults.DataTextSize,
+    target: Number = ChartDefaults.TARGET,
+    yLinesCount: Int = ChartDefaults.Y_LINES_COUNT,
+    visibleBarCount: Int = ChartDefaults.VISIBLE_BAR_COUNT,
+    isAnimated: Boolean = ChartDefaults.ANIMATED
 ) {
     val bounds = Rect()
     val textPaint = Paint().apply {
         isAntiAlias = true
-        textSize = dataTextSize
-        color = chartColor.toArgb()
+        textSize = dataTextSize.value
+        color = chartColors.chartColor().toArgb()
         textAlign = Paint.Align.CENTER
     }
     val text = target.toString()
     textPaint.getTextBounds(text, 0, text.length, bounds)
 
-    val hInset = horizontalInset + bounds.width()
-    val width = chartWidth * 8 / 9 - hInset
-    val height: Float = chartHeight * 9 / 10
-    val barOffset = width / visibleBarCount
-    val xAxisYOffset = width + barWidth
+    val width = chartSize.width().value - bounds.width()
+    val height = chartSize.height().value - SPACING_LARGE
+    val barOffset = width / visibleBarCount - barWidth.value
+    val xAxisYOffset = width + barWidth.value
     val yLabelXPos = 0f - bounds.width() / 2 - SPACING_MEDIUM
 
     ChartContent(
@@ -70,18 +70,16 @@ fun LTRScrollableBarChart(
         modifier = modifier,
         chartWidth = width,
         chartHeight = height,
-        chartStrokeWidth = chartStrokeWidth,
-        chartColor = chartColor,
-        barColor = barColor,
-        barColorLow = barColorLow,
-        barWidth = barWidth,
+        chartStrokeWidth = chartStrokeWidth.value,
+        barWidth = barWidth.value,
+        barCornerRadius = barCornerRadius,
         visibleBarCount = visibleBarCount,
-        dataTextSize = dataTextSize,
-        yLineStrokeWidth = yLineStrokeWidth,
+        dataTextSize = dataTextSize.value,
+        yLineStrokeWidth = yLineStrokeWidth.value,
+        verticalInset = verticalInset.value,
         yLinesCount = yLinesCount,
+        chartColors = chartColors,
         target = target,
-        horizontalInset = hInset,
-        verticalInset = verticalInset,
         isAnimated = isAnimated,
         scrollInit = 0f,
         xPos = yLabelXPos,

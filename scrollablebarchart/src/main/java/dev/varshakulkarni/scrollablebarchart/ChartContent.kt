@@ -22,9 +22,12 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -39,18 +42,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.dp
+import dev.varshakulkarni.scrollablebarchart.utils.ComposeImmutableList
 import kotlin.math.roundToInt
 
 const val SPACING_SMALL = 16f
 const val SPACING_MEDIUM = 32f
+const val SPACING_LARGE = 48f
 const val DASH_PATH_ON_INTERVAL = 10f
 const val DASH_PATH_OFF_INTERVAL = 4f
 const val DASH_PATH_PHASE_VALUE = 0f
@@ -58,21 +61,19 @@ const val DASH_PATH_PHASE_VALUE = 0f
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun ChartContent(
-    chartData: List<ChartData>,
+    chartData: ComposeImmutableList<ChartData>,
     modifier: Modifier,
-    chartColor: Color,
+    chartColors: ChartColors,
     chartWidth: Float,
     chartHeight: Float,
     chartStrokeWidth: Float,
-    barColor: Color,
-    barColorLow: Color,
     barWidth: Float,
+    barCornerRadius: CornerRadius,
     visibleBarCount: Int,
     dataTextSize: Float,
     yLineStrokeWidth: Float,
     yLinesCount: Int,
     target: Number,
-    horizontalInset: Float,
     verticalInset: Float,
     isAnimated: Boolean,
     scrollInit: Float,
@@ -115,7 +116,7 @@ internal fun ChartContent(
     val textPaint = Paint().apply {
         isAntiAlias = true
         textSize = dataTextSize
-        color = chartColor.toArgb()
+        color = chartColors.chartColor().toArgb()
         textAlign = Paint.Align.CENTER
     }
 
@@ -135,25 +136,35 @@ internal fun ChartContent(
         )
     }
 
-    Canvas(
+    val chartColor = chartColors.chartColor()
+    val barColor = chartColors.barColor()
+    val barColorLow = chartColors.barColorLow()
+    val backgroundColor = chartColors.backgroundColor()
+
+    Box(
         modifier = modifier
+            .background(backgroundColor)
             .width(chartWidth.dp)
             .height(chartHeight.dp)
-            .scrollable(scrollableState, Orientation.Horizontal)
-            .pointerInteropFilter {
-                when (it.action) {
-                    MotionEvent.ACTION_UP -> {
-                        showBarLabels = !showBarLabels
-                        false
-                    }
+    ) {
 
-                    else -> {
-                        true
+        Canvas(
+            modifier = modifier.fillMaxSize()
+                .scrollable(scrollableState, Orientation.Horizontal)
+                .pointerInteropFilter {
+                    when (it.action) {
+                        MotionEvent.ACTION_UP -> {
+                            showBarLabels = !showBarLabels
+                            false
+                        }
+
+                        else -> {
+                            true
+                        }
                     }
                 }
-            }
-    ) {
-        inset(horizontalInset, verticalInset) {
+        ) {
+//        inset(horizontalInset, verticalInset) {
             // draw x-axis line
             drawLine(
                 color = chartColor,
@@ -202,7 +213,7 @@ internal fun ChartContent(
                             chartHeight - bar.yValue.toFloat() * scaleFactor * animateFactor
                         ),
                         size = Size(barWidth, bar.yValue.toFloat() * scaleFactor * animateFactor),
-                        cornerRadius = CornerRadius(10f, 10f)
+                        cornerRadius = barCornerRadius
                     )
                 } else {
                     drawRoundRect(
@@ -213,7 +224,7 @@ internal fun ChartContent(
 
                         ),
                         size = Size(barWidth, bar.yValue.toFloat() * scaleFactor * animateFactor),
-                        cornerRadius = CornerRadius(10f, 10f)
+                        cornerRadius = barCornerRadius
                     )
                 }
                 if (bar.yValue != 0 && showBarLabels) {
