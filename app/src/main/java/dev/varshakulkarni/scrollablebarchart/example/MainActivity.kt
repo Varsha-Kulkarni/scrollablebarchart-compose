@@ -18,20 +18,26 @@ package dev.varshakulkarni.scrollablebarchart.example
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.varshakulkarni.scrollablebarchart.ChartData
+import dev.varshakulkarni.scrollablebarchart.ChartDefaults
 import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
 import dev.varshakulkarni.scrollablebarchart.example.ui.theme.ScrollablebarchartcomposeTheme
 import dev.varshakulkarni.scrollablebarchart.ui.chart.LTRScrollableBarChart
 import dev.varshakulkarni.scrollablebarchart.ui.chart.RTLScrollableBarChart
+import dev.varshakulkarni.scrollablebarchart.utils.rememberComposeImmutableList
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,30 +50,43 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val chartData = listOf(
-                        ChartData(100, 1f),
-                        ChartData(110, 2f),
-                        ChartData(120, 8f),
-                        ChartData(130, 3f),
-                        ChartData(140, 5f),
-                        ChartData(150, 6f),
-                        ChartData(160, 9f),
-                        ChartData(170, 4f),
-                        ChartData(180, 3f),
-                        ChartData(190, 6f),
-                        ChartData(200, 6f)
+                        ChartData(10, 1f),
+                        ChartData(11, 2f),
+                        ChartData(12, 8f),
+                        ChartData(13, 3f),
+                        ChartData(14, 5f),
+                        ChartData(15, 6f),
+                        ChartData(16, 9f),
+                        ChartData(17, 4f),
+                        ChartData(18, 3f),
+                        ChartData(19, 6f),
+                        ChartData(20, 6f)
                     )
+                    val immutableChartData by rememberComposeImmutableList { chartData }
+                    val data: List<ChartData> = remember(chartData) {
+                        chartData.reversed()
+                    }
+                    val reversed by rememberComposeImmutableList {
+                        data
+                    }
 
-                    BoxWithConstraints() {
-                        Column(Modifier.padding(SPACING_MEDIUM.dp)) {
-                            Text("Left to Right scroll")
-                            LTRScrollableBarChart(
-                                chartData, chartWidth = 600f, chartHeight = 600f
-                            )
-                            Text("Right to Left scroll")
-                            RTLScrollableBarChart(
-                                chartData, chartWidth = 600f, chartHeight = 600f
-                            )
-                        }
+                    Box(Modifier.padding(SPACING_MEDIUM.dp)) {
+                        Column(
+                            Modifier.verticalScroll(rememberScrollState()),
+                            content = {
+                                Text("Left to Right scroll")
+                                LTRScrollableBarChart(
+                                    chartData = immutableChartData,
+                                    chartSize = ChartDefaults.chartSize(600.dp, 500.dp)
+                                )
+
+                                Text("Right to Left scroll")
+                                RTLScrollableBarChart(
+                                    chartData = reversed,
+                                    chartSize = ChartDefaults.chartSize(600.dp, 500.dp)
+                                )
+                            }
+                        )
                     }
                 }
             }
