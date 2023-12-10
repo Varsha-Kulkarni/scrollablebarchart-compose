@@ -74,7 +74,6 @@ internal fun ChartContent(
     yLineStrokeWidth: Float,
     yLinesCount: Int,
     target: Number,
-    verticalInset: Float,
     isAnimated: Boolean,
     scrollInit: Float,
     xPos: Float,
@@ -84,15 +83,17 @@ internal fun ChartContent(
 ) {
     var scrollOffset by remember { mutableStateOf(scrollInit) }
 
-    val scrollableState = ScrollableState {
-        scrollOffset = if (it > 0) {
-            (scrollOffset - it * visibleBarCount.toFloat() / chartWidth).coerceAtLeast(0f)
-        } else {
-            (scrollOffset - it * visibleBarCount.toFloat() / chartWidth).coerceAtMost(
-                chartData.lastIndex.toFloat() - (visibleBarCount.toFloat() - 1)
-            )
+    val scrollableState = remember {
+        ScrollableState {
+            scrollOffset = if (it > 0) {
+                (scrollOffset - it * visibleBarCount.toFloat() / chartWidth).coerceAtLeast(0f)
+            } else {
+                (scrollOffset - it * visibleBarCount.toFloat() / chartWidth).coerceAtMost(
+                    chartData.lastIndex.toFloat() - (visibleBarCount.toFloat() - 1)
+                )
+            }
+            it
         }
-        it
     }
 
     val visibleBars by remember {
@@ -112,6 +113,26 @@ internal fun ChartContent(
         mutableStateOf(false)
     }
 
+    val maxY = remember {
+        chartData.maxWith(Comparator.comparing { it.yValue.toFloat() })
+    }
+    val scaleFactor = remember {
+        if (target.toFloat() > maxY.yValue.toFloat()) (chartHeight) / target.toFloat()
+        else (chartHeight) / maxY.yValue.toFloat()
+    }
+
+    val yLineItem = remember { target.toFloat() / yLinesCount }
+    val yLines = remember {
+        mutableListOf<Float>().apply {
+            repeat(yLinesCount) {
+                if (it >= 0) add(target.toFloat() - yLineItem * it)
+            }
+        }.toList()
+    }
+
+    val animatableBar = remember { Animatable(0f) }
+    val animateFactor = if (isAnimated) animatableBar.value else 1f
+
     val bounds = Rect()
     val textPaint = Paint().apply {
         isAntiAlias = true
@@ -119,15 +140,6 @@ internal fun ChartContent(
         color = chartColors.chartColor().toArgb()
         textAlign = Paint.Align.CENTER
     }
-
-    val maxY = chartData.maxWith(Comparator.comparing { it.yValue.toFloat() })
-    val scaleFactor =
-        getScaleFactor(target, maxY, chartHeight, verticalInset)
-    val yLineItem = target.toFloat() / yLinesCount
-    val yLines = getYLines(yLinesCount, target, yLineItem)
-
-    val animatableBar = remember { Animatable(0f) }
-    val animateFactor = if (isAnimated) animatableBar.value else 1f
 
     LaunchedEffect(animatableBar) {
         animatableBar.animateTo(
@@ -204,7 +216,7 @@ internal fun ChartContent(
             }
 
             visibleBars.forEach { bar ->
-                val xOffset = getXOffset(bar, chartWidth, visibleBars, visibleBarCount)
+                val xOffset = chartWidth * visibleBars.indexOf(bar) / visibleBarCount
                 if (bar.yValue.toDouble() >= target.toDouble()) {
                     drawRoundRect(
                         color = barColor,
@@ -254,29 +266,3 @@ internal fun ChartContent(
         }
     }
 }
-
-internal fun getXOffset(
-    chartData: ChartData,
-    chartWidth: Float,
-    visibleBars: List<ChartData>,
-    visibleBarCount: Int
-) =
-    chartWidth * visibleBars.indexOf(chartData) / visibleBarCount
-
-@Composable
-internal fun getYLines(yLinesCount: Int, target: Number, yLineItem: Float) =
-    mutableListOf<Float>().apply {
-        repeat(yLinesCount) {
-            if (it >= 0) add(target.toFloat() - yLineItem * it)
-        }
-    }
-
-@Composable
-internal fun getScaleFactor(
-    target: Number,
-    maxY: ChartData,
-    chartHeight: Float,
-    verticalInset: Float
-) =
-    if (target.toFloat() > maxY.yValue.toFloat()) (chartHeight - verticalInset) / target.toFloat()
-    else (chartHeight - verticalInset) / maxY.yValue.toFloat()
