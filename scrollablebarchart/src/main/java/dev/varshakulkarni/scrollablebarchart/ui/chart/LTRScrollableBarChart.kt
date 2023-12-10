@@ -32,6 +32,25 @@ import dev.varshakulkarni.scrollablebarchart.SPACING_LARGE
 import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
 import dev.varshakulkarni.scrollablebarchart.utils.ComposeImmutableList
 
+/**
+ * LTRScrollableBarChart displays a Bar chart, which can be scrollable left-to-right direction
+ * which is fully customizable .
+ *
+ * @param chartData [ChartData] with x and y axis values, x is of [Number] and y is [Any]
+ * @param modifier [Modifier] used to adjust the layout or drawing content.
+ * @param chartSize [ChartSize] width and height of the chart.
+ * @param chartStrokeWidth [Dp] stroke width of x and y axis .
+ * @param barWidth [Dp] width of each bar.
+ * @param barCornerRadius [CornerRadius] defines if each bar has rounded edges.
+ * @param yLineStrokeWidth [Dp] stroke width of horizontal lines drawn on y axis
+ * @param chartColors [ChartColors] chart colors
+ * @param dataTextSize [TextUnit] font size of the text on the chart
+ * @param target [Number] the minimum target to be achieved
+ * @param yLinesCount [Int] the lines to be shown of the y axis
+ * @param visibleBarCount [Int] number of bars that should be visible at a time
+ * @param isAnimated [Boolean] Animate the bar drawing
+ */
+
 @Composable
 fun LTRScrollableBarChart(
     chartData: ComposeImmutableList<ChartData>,
@@ -41,7 +60,6 @@ fun LTRScrollableBarChart(
     barWidth: Dp = ChartDefaults.BarWidth,
     barCornerRadius: CornerRadius = ChartDefaults.BarCornerRadius,
     yLineStrokeWidth: Dp = ChartDefaults.YLineStrokeWidth,
-    verticalInset: Dp = ChartDefaults.VerticalInset,
     chartColors: ChartColors = ChartDefaults.chartColors(),
     dataTextSize: TextUnit = ChartDefaults.DataTextSize,
     target: Number = ChartDefaults.TARGET,
@@ -76,7 +94,6 @@ fun LTRScrollableBarChart(
         visibleBarCount = visibleBarCount,
         dataTextSize = dataTextSize.value,
         yLineStrokeWidth = yLineStrokeWidth.value,
-        verticalInset = verticalInset.value,
         yLinesCount = yLinesCount,
         chartColors = chartColors,
         target = target,

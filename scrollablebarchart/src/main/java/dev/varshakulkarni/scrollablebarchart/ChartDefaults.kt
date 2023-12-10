@@ -55,7 +55,7 @@ object ChartDefaults {
 
     @Composable
     fun chartSize(
-        width: Dp = LocalConfiguration.current.screenWidthDp.toFloat().dp,
+        width: Dp = LocalConfiguration.current.screenWidthDp.dp,
         height: Dp = LocalConfiguration.current.screenWidthDp.dp
     ): ChartSize = DefaultChartSize(width = width, height = height)
 }
