@@ -15,6 +15,7 @@
  */
 package dev.varshakulkarni.scrollablebarchart.ui.chart
 
+// import dev.varshakulkarni.scrollablebarchart.ui.BarChart
 import android.graphics.Paint
 import android.graphics.Rect
 import androidx.compose.runtime.Composable
@@ -23,20 +24,20 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import dev.varshakulkarni.scrollablebarchart.BarChart
 import dev.varshakulkarni.scrollablebarchart.ChartColors
-import dev.varshakulkarni.scrollablebarchart.ChartContent
 import dev.varshakulkarni.scrollablebarchart.ChartData
+import dev.varshakulkarni.scrollablebarchart.ChartDataCollection
 import dev.varshakulkarni.scrollablebarchart.ChartDefaults
 import dev.varshakulkarni.scrollablebarchart.ChartSize
 import dev.varshakulkarni.scrollablebarchart.SPACING_LARGE
 import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
-import dev.varshakulkarni.scrollablebarchart.utils.ComposeImmutableList
 
 /**
  * LTRScrollableBarChart displays a Bar chart, which can be scrollable left-to-right direction
  * which is fully customizable .
  *
- * @param chartData [ChartData] with x and y axis values, x is of [Number] and y is [Any]
+ * @param chartDataCollection [ChartDataCollection] collection containing list of [ChartData] with x and y axis values, x is of [Number] and y is [Any]
  * @param modifier [Modifier] used to adjust the layout or drawing content.
  * @param chartSize [ChartSize] width and height of the chart.
  * @param chartStrokeWidth [Dp] stroke width of x and y axis .
@@ -53,7 +54,7 @@ import dev.varshakulkarni.scrollablebarchart.utils.ComposeImmutableList
 
 @Composable
 fun LTRScrollableBarChart(
-    chartData: ComposeImmutableList<ChartData>,
+    chartDataCollection: ChartDataCollection,
     modifier: Modifier = Modifier,
     chartSize: ChartSize = ChartDefaults.chartSize(),
     chartStrokeWidth: Dp = ChartDefaults.ChartStrokeWidth,
@@ -83,8 +84,8 @@ fun LTRScrollableBarChart(
     val xAxisYOffset = width + barWidth.value
     val yLabelXPos = 0f - bounds.width() / 2 - SPACING_MEDIUM
 
-    ChartContent(
-        chartData = chartData,
+    BarChart(
+        chartDataCollection = chartDataCollection,
         modifier = modifier,
         chartWidth = width,
         chartHeight = height,

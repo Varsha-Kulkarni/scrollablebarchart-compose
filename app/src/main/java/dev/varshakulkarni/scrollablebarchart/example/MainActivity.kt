@@ -29,16 +29,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.varshakulkarni.scrollablebarchart.ChartData
+import dev.varshakulkarni.scrollablebarchart.ChartDataCollection
 import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
 import dev.varshakulkarni.scrollablebarchart.example.ui.theme.ScrollablebarchartcomposeTheme
 import dev.varshakulkarni.scrollablebarchart.ui.chart.LTRScrollableBarChart
 import dev.varshakulkarni.scrollablebarchart.ui.chart.RTLScrollableBarChart
-import dev.varshakulkarni.scrollablebarchart.utils.rememberComposeImmutableList
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,12 +62,8 @@ class MainActivity : ComponentActivity() {
                         ChartData(19, 6f),
                         ChartData(20, 6f)
                     )
-                    val immutableChartData by rememberComposeImmutableList { chartData }
-                    val data: List<ChartData> = remember(chartData) {
+                    val reversedData: List<ChartData> = remember(chartData) {
                         chartData.reversed()
-                    }
-                    val reversed by rememberComposeImmutableList {
-                        data
                     }
 
                     Box(Modifier.padding(SPACING_MEDIUM.dp)) {
@@ -78,13 +73,15 @@ class MainActivity : ComponentActivity() {
                                 Text("Left to Right scroll")
                                 Spacer(modifier = Modifier.height(24.dp))
                                 LTRScrollableBarChart(
-                                    chartData = immutableChartData,
+                                    chartDataCollection = ChartDataCollection(chartData),
+                                    modifier = Modifier.padding(24.dp)
                                 )
 
                                 Text("Right to Left scroll")
                                 Spacer(modifier = Modifier.height(24.dp))
                                 RTLScrollableBarChart(
-                                    chartData = reversed,
+                                    chartDataCollection = ChartDataCollection(reversedData),
+                                    Modifier.padding(24.dp)
                                 )
                             }
                         )

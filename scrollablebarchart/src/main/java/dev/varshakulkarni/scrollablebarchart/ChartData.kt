@@ -22,3 +22,8 @@ data class ChartData(
     val xValue: Any,
     val yValue: Number
 )
+
+@Immutable
+data class ChartDataCollection(
+    val chartData: List<ChartData>
+)

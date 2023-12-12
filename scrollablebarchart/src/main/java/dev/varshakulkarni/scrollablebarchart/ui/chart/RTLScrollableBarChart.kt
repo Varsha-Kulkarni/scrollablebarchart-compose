@@ -23,20 +23,20 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import dev.varshakulkarni.scrollablebarchart.BarChart
 import dev.varshakulkarni.scrollablebarchart.ChartColors
-import dev.varshakulkarni.scrollablebarchart.ChartContent
 import dev.varshakulkarni.scrollablebarchart.ChartData
+import dev.varshakulkarni.scrollablebarchart.ChartDataCollection
 import dev.varshakulkarni.scrollablebarchart.ChartDefaults
 import dev.varshakulkarni.scrollablebarchart.ChartSize
 import dev.varshakulkarni.scrollablebarchart.SPACING_LARGE
 import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
-import dev.varshakulkarni.scrollablebarchart.utils.ComposeImmutableList
 
 /**
  * RTLScrollableBarChart displays a Bar chart, which can be scrollable right-to-left direction
  * which is fully customizable .
  *
- * @param chartData [ChartData] with x and y axis values, x is of [Number] and y is [Any]
+ * @param chartDataCollection [ChartDataCollection] collection containing list of [ChartData] with x and y axis values, x is of [Number] and y is [Any]
  * @param modifier [Modifier] used to adjust the layout or drawing content.
  * @param chartSize [ChartSize] width and height of the chart.
  * @param chartStrokeWidth [Dp] stroke width of x and y axis .
@@ -53,7 +53,7 @@ import dev.varshakulkarni.scrollablebarchart.utils.ComposeImmutableList
 
 @Composable
 fun RTLScrollableBarChart(
-    chartData: ComposeImmutableList<ChartData>,
+    chartDataCollection: ChartDataCollection,
     modifier: Modifier = Modifier,
     chartSize: ChartSize = ChartDefaults.chartSize(),
     chartStrokeWidth: Dp = ChartDefaults.ChartStrokeWidth,
@@ -79,11 +79,11 @@ fun RTLScrollableBarChart(
 
     val width = chartSize.width().value - bounds.width()
     val height = chartSize.height().value - SPACING_LARGE
-    val scrollInit = chartData.size.toFloat() - visibleBarCount
+    val scrollInit = chartDataCollection.chartData.size.toFloat() - visibleBarCount
     val yLabelXPos = width + bounds.width() / 2 + SPACING_MEDIUM
 
-    ChartContent(
-        chartData = chartData,
+    BarChart(
+        chartDataCollection = chartDataCollection,
         modifier = modifier,
         chartWidth = width,
         chartHeight = height,
