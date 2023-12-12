@@ -24,7 +24,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,11 +31,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -48,8 +43,6 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.dp
-import dev.varshakulkarni.scrollablebarchart.utils.ComposeImmutableList
-import kotlin.math.roundToInt
 
 const val SPACING_SMALL = 16f
 const val SPACING_MEDIUM = 32f
@@ -60,8 +53,8 @@ const val DASH_PATH_PHASE_VALUE = 0f
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-internal fun ChartContent(
-    chartData: ComposeImmutableList<ChartData>,
+internal fun BarChart(
+    chartDataCollection: ChartDataCollection,
     modifier: Modifier,
     chartColors: ChartColors,
     chartWidth: Float,
@@ -81,54 +74,17 @@ internal fun ChartContent(
     yAxisXOffset: Float,
     xAxisYOffset: Float,
 ) {
-    var scrollOffset by remember { mutableStateOf(scrollInit) }
+    val state = rememberSaveableChartState(
+        scrollOffset = scrollInit,
+        target = target.toFloat(),
+        noOfVisibleBarCount = visibleBarCount,
+        yLinesCount = yLinesCount,
+        barData = chartDataCollection.chartData
+    )
 
-    val scrollableState = remember {
-        ScrollableState {
-            scrollOffset = if (it > 0) {
-                (scrollOffset - it * visibleBarCount.toFloat() / chartWidth).coerceAtLeast(0f)
-            } else {
-                (scrollOffset - it * visibleBarCount.toFloat() / chartWidth).coerceAtMost(
-                    chartData.lastIndex.toFloat() - (visibleBarCount.toFloat() - 1)
-                )
-            }
-            it
-        }
-    }
+    state.setViewSize(chartWidth, chartHeight)
 
-    val visibleBars by remember {
-        derivedStateOf {
-            if (chartData.isNotEmpty()) {
-                chartData.subList(
-                    scrollOffset.roundToInt().coerceAtLeast(0),
-                    (scrollOffset.roundToInt() + visibleBarCount).coerceAtMost(chartData.size)
-                )
-            } else {
-                emptyList()
-            }
-        }
-    }
-
-    var showBarLabels by remember {
-        mutableStateOf(false)
-    }
-
-    val maxY = remember {
-        chartData.maxWith(Comparator.comparing { it.yValue.toFloat() })
-    }
-    val scaleFactor = remember {
-        if (target.toFloat() > maxY.yValue.toFloat()) (chartHeight) / target.toFloat()
-        else (chartHeight) / maxY.yValue.toFloat()
-    }
-
-    val yLineItem = remember { target.toFloat() / yLinesCount }
-    val yLines = remember {
-        mutableListOf<Float>().apply {
-            repeat(yLinesCount) {
-                if (it >= 0) add(target.toFloat() - yLineItem * it)
-            }
-        }.toList()
-    }
+    val scaleFactor = state.getScaleFactor()
 
     val animatableBar = remember { Animatable(0f) }
     val animateFactor = if (isAnimated) animatableBar.value else 1f
@@ -162,11 +118,11 @@ internal fun ChartContent(
 
         Canvas(
             modifier = modifier.fillMaxSize()
-                .scrollable(scrollableState, Orientation.Horizontal)
+                .scrollable(state.scrollableState, Orientation.Horizontal)
                 .pointerInteropFilter {
                     when (it.action) {
                         MotionEvent.ACTION_UP -> {
-                            showBarLabels = !showBarLabels
+                            state.showBarLabels = !state.showBarLabels
                             false
                         }
 
@@ -176,7 +132,6 @@ internal fun ChartContent(
                     }
                 }
         ) {
-//        inset(horizontalInset, verticalInset) {
             // draw x-axis line
             drawLine(
                 color = chartColor,
@@ -192,7 +147,7 @@ internal fun ChartContent(
                 end = Offset(yAxisXOffset, chartHeight),
             )
 
-            yLines.forEach { value: Float ->
+            state.yLines.forEach { value: Float ->
                 drawLine(
                     color = chartColor,
                     strokeWidth = yLineStrokeWidth,
@@ -215,8 +170,8 @@ internal fun ChartContent(
                 }
             }
 
-            visibleBars.forEach { bar ->
-                val xOffset = chartWidth * visibleBars.indexOf(bar) / visibleBarCount
+            state.visibleBars.forEach { bar ->
+                val xOffset = chartWidth * state.visibleBars.indexOf(bar) / visibleBarCount
                 if (bar.yValue.toDouble() >= target.toDouble()) {
                     drawRoundRect(
                         color = barColor,
@@ -239,7 +194,7 @@ internal fun ChartContent(
                         cornerRadius = barCornerRadius
                     )
                 }
-                if (bar.yValue != 0 && showBarLabels) {
+                if (bar.yValue != 0 && state.showBarLabels) {
                     drawIntoCanvas {
                         val text = bar.yValue.toString()
                         textPaint.getTextBounds(text, 0, text.length, bounds)

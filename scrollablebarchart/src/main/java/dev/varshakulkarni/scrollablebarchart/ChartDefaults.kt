@@ -35,7 +35,7 @@ object ChartDefaults {
     val DataTextSize = 35.sp
     val YLineStrokeWidth = 1.dp
 
-    const val TARGET = 8
+    const val TARGET = 0f
     const val VISIBLE_BAR_COUNT = 6
     const val Y_LINES_COUNT = 4
     const val ANIMATED = true
