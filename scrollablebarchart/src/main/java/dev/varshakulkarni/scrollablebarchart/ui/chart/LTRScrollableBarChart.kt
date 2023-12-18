@@ -98,6 +98,7 @@ fun LTRScrollableBarChart(
         yLinesCount = yLinesCount,
         chartColors = chartColors,
         target = target,
+        targetSet = target != 0f,
         isAnimated = isAnimated,
         scrollInit = 0f,
         xPos = yLabelXPos,

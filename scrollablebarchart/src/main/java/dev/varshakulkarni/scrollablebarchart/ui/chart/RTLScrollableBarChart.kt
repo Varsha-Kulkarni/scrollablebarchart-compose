@@ -18,6 +18,7 @@ package dev.varshakulkarni.scrollablebarchart.ui.chart
 import android.graphics.Paint
 import android.graphics.Rect
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.toArgb
@@ -79,8 +80,10 @@ fun RTLScrollableBarChart(
 
     val width = chartSize.width().value - bounds.width()
     val height = chartSize.height().value - SPACING_LARGE
-    val scrollInit = chartDataCollection.chartData.size.toFloat() - visibleBarCount
-    val yLabelXPos = width + bounds.width() / 2 + SPACING_MEDIUM
+    val scrollInit = rememberSaveable() {
+        chartDataCollection.chartData.size.toFloat() - visibleBarCount
+    }
+    val yLabelXPos = rememberSaveable() { width + bounds.width() / 2 + SPACING_MEDIUM }
 
     BarChart(
         chartDataCollection = chartDataCollection,
@@ -96,6 +99,7 @@ fun RTLScrollableBarChart(
         yLineStrokeWidth = yLineStrokeWidth.value,
         yLinesCount = yLinesCount,
         target = target,
+        targetSet = target != 0f,
         isAnimated = isAnimated,
         scrollInit = scrollInit,
         xPos = yLabelXPos,

@@ -33,12 +33,14 @@ fun rememberSaveableChartState(
     yLinesCount: Int,
     barData: List<ChartData>,
     target: Float = 0f,
+    targetSet: Boolean,
     scrollOffset: Float,
 ): BarChartState {
     return rememberSaveable(saver = BarChartState.Saver) {
         BarChartState.getState(
             barData = barData,
             target = target,
+            targetSet = targetSet,
             yLinesCount = yLinesCount,
             noOfVisibleBarCount = noOfVisibleBarCount,
             scrollOffset = scrollOffset
@@ -47,6 +49,7 @@ fun rememberSaveableChartState(
 }
 
 class BarChartState {
+    private var targetSet by mutableStateOf(false)
     private var viewWidth = 0f
     private var viewHeight = 0f
     var noVisibleBarCount by mutableStateOf(0)
@@ -73,15 +76,6 @@ class BarChartState {
     private val Float.scrolledBars: Float
         get() = this * visibleBarCount.toFloat() / viewWidth
 
-    val yLines by derivedStateOf {
-        val yLineItem = target / yLinesCount
-        mutableListOf<Float>().apply {
-            repeat(yLinesCount) {
-                if (it >= 0) add(target - yLineItem * it.toFloat())
-            }
-        }
-    }
-
     val visibleBars by derivedStateOf {
         if (barData.isNotEmpty()) {
             barData.subList(
@@ -102,13 +96,25 @@ class BarChartState {
     }
 
     fun getScaleFactor(): Float {
-        if (barData.isNotEmpty()) {
-            val maxY = barData.maxWith(Comparator.comparing { it.yValue.toFloat() })
-            if (target == 0f) target = maxY.yValue.toFloat()
+        if (visibleBars.isNotEmpty()) {
+            val maxY = visibleBars.maxWith(Comparator.comparing { it.yValue.toFloat() })
+            if (!targetSet) {
+                target = maxY.yValue.toFloat()
+            }
             return if (target > maxY.yValue.toFloat()) viewHeight / target
             else viewHeight / maxY.yValue.toFloat()
         }
         return 0f
+    }
+
+    fun getYLines(): List<Float> {
+        val yLineItem = target / yLinesCount
+
+        return mutableListOf<Float>().apply {
+            repeat(yLinesCount) {
+                if (it >= 0) add(target - yLineItem * it.toFloat())
+            }
+        }
     }
 
     fun setViewSize(width: Float, height: Float) {
@@ -126,12 +132,14 @@ class BarChartState {
             target: Float,
             noOfVisibleBarCount: Int,
             yLinesCount: Int,
+            targetSet: Boolean,
             barData: List<ChartData>,
             visibleBarCount: Int? = null,
             scrollOffset: Float? = null,
         ) =
             BarChartState().apply {
                 this.target = target
+                this.targetSet = targetSet
                 this.noVisibleBarCount = noOfVisibleBarCount
                 this.yLinesCount = yLinesCount
                 this.barData = barData
@@ -144,6 +152,7 @@ class BarChartState {
             save = {
                 listOf(
                     it.target,
+                    it.targetSet,
                     it.noVisibleBarCount,
                     it.yLinesCount,
                     it.barData,
@@ -154,11 +163,12 @@ class BarChartState {
             restore = {
                 getState(
                     target = it[0] as Float,
-                    noOfVisibleBarCount = it[1] as Int,
-                    yLinesCount = it[2] as Int,
-                    barData = it[3] as List<ChartData>,
-                    visibleBarCount = it[4] as Int,
-                    scrollOffset = it[5] as Float,
+                    targetSet = it[1] as Boolean,
+                    noOfVisibleBarCount = it[2] as Int,
+                    yLinesCount = it[3] as Int,
+                    barData = it[4] as List<ChartData>,
+                    visibleBarCount = it[5] as Int,
+                    scrollOffset = it[6] as Float,
                 )
             }
         )
