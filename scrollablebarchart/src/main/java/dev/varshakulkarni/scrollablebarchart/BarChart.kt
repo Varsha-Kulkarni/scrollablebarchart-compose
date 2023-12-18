@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -67,6 +68,7 @@ internal fun BarChart(
     yLineStrokeWidth: Float,
     yLinesCount: Int,
     target: Number,
+    targetSet: Boolean,
     isAnimated: Boolean,
     scrollInit: Float,
     xPos: Float,
@@ -77,6 +79,7 @@ internal fun BarChart(
     val state = rememberSaveableChartState(
         scrollOffset = scrollInit,
         target = target.toFloat(),
+        targetSet = targetSet,
         noOfVisibleBarCount = visibleBarCount,
         yLinesCount = yLinesCount,
         barData = chartDataCollection.chartData
@@ -84,7 +87,13 @@ internal fun BarChart(
 
     state.setViewSize(chartWidth, chartHeight)
 
-    val scaleFactor = state.getScaleFactor()
+    val scaleFactor = rememberSaveable(state.visibleBars) {
+        state.getScaleFactor()
+    }
+
+    val yLines = rememberSaveable(state.target) {
+        state.getYLines()
+    }
 
     val animatableBar = remember { Animatable(0f) }
     val animateFactor = if (isAnimated) animatableBar.value else 1f
@@ -147,7 +156,7 @@ internal fun BarChart(
                 end = Offset(yAxisXOffset, chartHeight),
             )
 
-            state.yLines.forEach { value: Float ->
+            yLines.forEach { value: Float ->
                 drawLine(
                     color = chartColor,
                     strokeWidth = yLineStrokeWidth,

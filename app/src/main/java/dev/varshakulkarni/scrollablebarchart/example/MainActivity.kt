@@ -29,7 +29,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.varshakulkarni.scrollablebarchart.ChartData
@@ -50,19 +50,19 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val chartData = listOf(
-                        ChartData(10, 1f),
-                        ChartData(11, 2f),
-                        ChartData(12, 8f),
-                        ChartData(13, 3f),
-                        ChartData(14, 5f),
+                        ChartData(10, 1),
+                        ChartData(11, 2),
+                        ChartData(12, 8),
+                        ChartData(13, 3),
+                        ChartData(14, 5),
                         ChartData(15, 6f),
                         ChartData(16, 9f),
                         ChartData(17, 4f),
                         ChartData(18, 3f),
-                        ChartData(19, 6f),
+                        ChartData(19, 60f),
                         ChartData(20, 6f)
                     )
-                    val reversedData: List<ChartData> = remember(chartData) {
+                    val reversedData: List<ChartData> = rememberSaveable(chartData) {
                         chartData.reversed()
                     }
 
@@ -81,7 +81,8 @@ class MainActivity : ComponentActivity() {
                                 Spacer(modifier = Modifier.height(24.dp))
                                 RTLScrollableBarChart(
                                     chartDataCollection = ChartDataCollection(reversedData),
-                                    Modifier.padding(24.dp)
+                                    target = 30f,
+                                    modifier = Modifier.padding(24.dp)
                                 )
                             }
                         )
