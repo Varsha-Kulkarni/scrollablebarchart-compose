@@ -18,17 +18,17 @@ package dev.varshakulkarni.scrollablebarchart.ui.chart
 import android.graphics.Paint
 import android.graphics.Rect
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import dev.varshakulkarni.scrollablebarchart.BarChart
+import dev.varshakulkarni.scrollablebarchart.BarChartData
+import dev.varshakulkarni.scrollablebarchart.BarChartDataCollection
+import dev.varshakulkarni.scrollablebarchart.BarChartDefaults
 import dev.varshakulkarni.scrollablebarchart.ChartColors
-import dev.varshakulkarni.scrollablebarchart.ChartData
-import dev.varshakulkarni.scrollablebarchart.ChartDataCollection
-import dev.varshakulkarni.scrollablebarchart.ChartDefaults
 import dev.varshakulkarni.scrollablebarchart.ChartSize
 import dev.varshakulkarni.scrollablebarchart.SPACING_LARGE
 import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
@@ -37,7 +37,7 @@ import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
  * RTLScrollableBarChart displays a Bar chart, which can be scrollable right-to-left direction
  * which is fully customizable .
  *
- * @param chartDataCollection [ChartDataCollection] collection containing list of [ChartData] with x and y axis values, x is of [Number] and y is [Any]
+ * @param barChartDataCollection [BarChartDataCollection] collection containing list of [BarChartData] with x and y axis values, x is of [Number] and y is [Any]
  * @param modifier [Modifier] used to adjust the layout or drawing content.
  * @param chartSize [ChartSize] width and height of the chart.
  * @param chartStrokeWidth [Dp] stroke width of x and y axis .
@@ -54,19 +54,19 @@ import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
 
 @Composable
 fun RTLScrollableBarChart(
-    chartDataCollection: ChartDataCollection,
+    barChartDataCollection: BarChartDataCollection,
     modifier: Modifier = Modifier,
-    chartSize: ChartSize = ChartDefaults.chartSize(),
-    chartStrokeWidth: Dp = ChartDefaults.ChartStrokeWidth,
-    barWidth: Dp = ChartDefaults.BarWidth,
-    barCornerRadius: CornerRadius = ChartDefaults.BarCornerRadius,
-    yLineStrokeWidth: Dp = ChartDefaults.YLineStrokeWidth,
-    chartColors: ChartColors = ChartDefaults.chartColors(),
-    dataTextSize: TextUnit = ChartDefaults.DataTextSize,
-    target: Number = ChartDefaults.TARGET,
-    yLinesCount: Int = ChartDefaults.Y_LINES_COUNT,
-    visibleBarCount: Int = ChartDefaults.VISIBLE_BAR_COUNT,
-    isAnimated: Boolean = ChartDefaults.ANIMATED
+    chartSize: ChartSize = BarChartDefaults.chartSize(),
+    chartStrokeWidth: Dp = BarChartDefaults.ChartStrokeWidth,
+    barWidth: Dp = BarChartDefaults.BarWidth,
+    barCornerRadius: CornerRadius = BarChartDefaults.BarCornerRadius,
+    yLineStrokeWidth: Dp = BarChartDefaults.YLineStrokeWidth,
+    chartColors: ChartColors = BarChartDefaults.chartColors(),
+    dataTextSize: TextUnit = BarChartDefaults.DataTextSize,
+    target: Number = BarChartDefaults.TARGET,
+    yLinesCount: Int = BarChartDefaults.Y_LINES_COUNT,
+    visibleBarCount: Int = BarChartDefaults.VISIBLE_BAR_COUNT,
+    isAnimated: Boolean = BarChartDefaults.ANIMATED
 ) {
     val bounds = Rect()
     val textPaint = Paint().apply {
@@ -80,13 +80,13 @@ fun RTLScrollableBarChart(
 
     val width = chartSize.width().value - bounds.width()
     val height = chartSize.height().value - SPACING_LARGE
-    val scrollInit = rememberSaveable() {
-        chartDataCollection.chartData.size.toFloat() - visibleBarCount
+    val scrollInit = remember {
+        barChartDataCollection.barChartData.size.toFloat() - visibleBarCount
     }
-    val yLabelXPos = rememberSaveable() { width + bounds.width() / 2 + SPACING_MEDIUM }
+    val yLabelXPos = remember { width + bounds.width() / 2 + SPACING_MEDIUM }
 
     BarChart(
-        chartDataCollection = chartDataCollection,
+        barChartDataCollection = barChartDataCollection,
         modifier = modifier,
         chartWidth = width,
         chartHeight = height,

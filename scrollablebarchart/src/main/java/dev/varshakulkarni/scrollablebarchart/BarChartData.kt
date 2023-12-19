@@ -18,12 +18,12 @@ package dev.varshakulkarni.scrollablebarchart
 import androidx.compose.runtime.Immutable
 
 @Immutable
-data class ChartData(
+data class BarChartData(
     val xValue: Any,
     val yValue: Number
 )
 
 @Immutable
-data class ChartDataCollection(
-    val chartData: List<ChartData>
+data class BarChartDataCollection(
+    val barChartData: List<BarChartData>
 )

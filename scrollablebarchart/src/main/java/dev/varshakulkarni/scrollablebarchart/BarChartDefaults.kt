@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-object ChartDefaults {
+object BarChartDefaults {
     val ChartStrokeWidth = 2.dp
     val HorizontalInset = 24.dp
     val VerticalInset = 24.dp
