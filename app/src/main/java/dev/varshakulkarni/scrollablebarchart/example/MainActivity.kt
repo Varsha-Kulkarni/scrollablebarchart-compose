@@ -32,8 +32,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.varshakulkarni.scrollablebarchart.ChartData
-import dev.varshakulkarni.scrollablebarchart.ChartDataCollection
+import dev.varshakulkarni.scrollablebarchart.BarChartData
+import dev.varshakulkarni.scrollablebarchart.BarChartDataCollection
 import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
 import dev.varshakulkarni.scrollablebarchart.example.ui.theme.ScrollablebarchartcomposeTheme
 import dev.varshakulkarni.scrollablebarchart.ui.chart.LTRScrollableBarChart
@@ -49,21 +49,21 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val chartData = listOf(
-                        ChartData(10, 1),
-                        ChartData(11, 2),
-                        ChartData(12, 8),
-                        ChartData(13, 3),
-                        ChartData(14, 5),
-                        ChartData(15, 6f),
-                        ChartData(16, 9f),
-                        ChartData(17, 4f),
-                        ChartData(18, 3f),
-                        ChartData(19, 60f),
-                        ChartData(20, 6f)
+                    val barChartData = listOf(
+                        BarChartData(10, 1),
+                        BarChartData(11, 2),
+                        BarChartData(12, 8),
+                        BarChartData(13, 3),
+                        BarChartData(14, 5),
+                        BarChartData(15, 6f),
+                        BarChartData(16, 9f),
+                        BarChartData(17, 4f),
+                        BarChartData(18, 3f),
+                        BarChartData(19, 60f),
+                        BarChartData(20, 6f)
                     )
-                    val reversedData: List<ChartData> = rememberSaveable(chartData) {
-                        chartData.reversed()
+                    val reversedData: List<BarChartData> = rememberSaveable(barChartData) {
+                        barChartData.reversed()
                     }
 
                     Box(Modifier.padding(SPACING_MEDIUM.dp)) {
@@ -73,14 +73,14 @@ class MainActivity : ComponentActivity() {
                                 Text("Left to Right scroll")
                                 Spacer(modifier = Modifier.height(24.dp))
                                 LTRScrollableBarChart(
-                                    chartDataCollection = ChartDataCollection(chartData),
+                                    barChartDataCollection = BarChartDataCollection(barChartData),
                                     modifier = Modifier.padding(24.dp)
                                 )
 
                                 Text("Right to Left scroll")
                                 Spacer(modifier = Modifier.height(24.dp))
                                 RTLScrollableBarChart(
-                                    chartDataCollection = ChartDataCollection(reversedData),
+                                    barChartDataCollection = BarChartDataCollection(reversedData),
                                     target = 30f,
                                     modifier = Modifier.padding(24.dp)
                                 )

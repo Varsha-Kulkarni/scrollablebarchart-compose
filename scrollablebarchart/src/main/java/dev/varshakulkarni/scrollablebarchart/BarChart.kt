@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -55,7 +54,7 @@ const val DASH_PATH_PHASE_VALUE = 0f
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun BarChart(
-    chartDataCollection: ChartDataCollection,
+    barChartDataCollection: BarChartDataCollection,
     modifier: Modifier,
     chartColors: ChartColors,
     chartWidth: Float,
@@ -82,16 +81,16 @@ internal fun BarChart(
         targetSet = targetSet,
         noOfVisibleBarCount = visibleBarCount,
         yLinesCount = yLinesCount,
-        barData = chartDataCollection.chartData
+        barData = barChartDataCollection.barChartData
     )
 
     state.setViewSize(chartWidth, chartHeight)
 
-    val scaleFactor = rememberSaveable(state.visibleBars) {
+    val scaleFactor = remember(state.visibleBars) {
         state.getScaleFactor()
     }
 
-    val yLines = rememberSaveable(state.target) {
+    val yLines = remember(state.target) {
         state.getYLines()
     }
 

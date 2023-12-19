@@ -31,7 +31,7 @@ import kotlin.math.roundToInt
 fun rememberSaveableChartState(
     noOfVisibleBarCount: Int,
     yLinesCount: Int,
-    barData: List<ChartData>,
+    barData: List<BarChartData>,
     target: Float = 0f,
     targetSet: Boolean,
     scrollOffset: Float,
@@ -55,7 +55,7 @@ class BarChartState {
     var noVisibleBarCount by mutableStateOf(0)
     var target by mutableStateOf(0f)
     var yLinesCount by mutableStateOf(0)
-    var barData = listOf<ChartData>()
+    var barData = listOf<BarChartData>()
     var visibleBarCount by mutableStateOf(0)
     var scrollOffset by mutableStateOf(0f)
 
@@ -122,7 +122,7 @@ class BarChartState {
         viewHeight = height
     }
 
-    fun xOffset(barData: ChartData) =
+    fun xOffset(barData: BarChartData) =
         viewWidth * visibleBars.indexOf(barData) / visibleBarCount
 
     fun yOffset(value: Int) = value
@@ -133,7 +133,7 @@ class BarChartState {
             noOfVisibleBarCount: Int,
             yLinesCount: Int,
             targetSet: Boolean,
-            barData: List<ChartData>,
+            barData: List<BarChartData>,
             visibleBarCount: Int? = null,
             scrollOffset: Float? = null,
         ) =
@@ -166,7 +166,7 @@ class BarChartState {
                     targetSet = it[1] as Boolean,
                     noOfVisibleBarCount = it[2] as Int,
                     yLinesCount = it[3] as Int,
-                    barData = it[4] as List<ChartData>,
+                    barData = it[4] as List<BarChartData>,
                     visibleBarCount = it[5] as Int,
                     scrollOffset = it[6] as Float,
                 )
