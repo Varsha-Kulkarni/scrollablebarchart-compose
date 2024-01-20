@@ -18,6 +18,7 @@ package dev.varshakulkarni.scrollablebarchart.example
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.varshakulkarni.scrollablebarchart.BarChartData
 import dev.varshakulkarni.scrollablebarchart.BarChartDataCollection
-import dev.varshakulkarni.scrollablebarchart.SPACING_MEDIUM
 import dev.varshakulkarni.scrollablebarchart.example.ui.theme.ScrollablebarchartcomposeTheme
 import dev.varshakulkarni.scrollablebarchart.ui.chart.LTRScrollableBarChart
 import dev.varshakulkarni.scrollablebarchart.ui.chart.RTLScrollableBarChart
@@ -51,7 +51,6 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val barChartData = listOf(
                         BarChartData(10, 1),
-                        BarChartData(11, 2),
                         BarChartData(12, 8),
                         BarChartData(13, 3),
                         BarChartData(14, 5),
@@ -66,15 +65,23 @@ class MainActivity : ComponentActivity() {
                         barChartData.reversed()
                     }
 
-                    Box(Modifier.padding(SPACING_MEDIUM.dp)) {
+                    Box(Modifier) {
                         Column(
-                            Modifier.verticalScroll(rememberScrollState()),
+                            Modifier.verticalScroll(rememberScrollState()).horizontalScroll(
+                                rememberScrollState()
+                            ),
                             content = {
                                 Text("Left to Right scroll")
                                 Spacer(modifier = Modifier.height(24.dp))
                                 LTRScrollableBarChart(
                                     barChartDataCollection = BarChartDataCollection(barChartData),
-                                    modifier = Modifier.padding(24.dp)
+                                    modifier = Modifier,
+                                    target = 6f,
+                                    yLinesCount = 1,
+//                                    chartSize = BarChartDefaults.chartSize(
+//                                        2000.dp,
+//                                        3000.dp
+//                                    )
                                 )
 
                                 Text("Right to Left scroll")

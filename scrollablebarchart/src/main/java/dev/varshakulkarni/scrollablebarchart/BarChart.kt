@@ -69,14 +69,15 @@ internal fun BarChart(
     target: Number,
     targetSet: Boolean,
     isAnimated: Boolean,
-    scrollInit: Float,
-    xPos: Float,
+    scrollOffset: Float,
     barOffset: Float,
-    yAxisXOffset: Float,
-    xAxisYOffset: Float,
+    xLabelSpacing: Float,
+    yLabelSpacing: Float,
+    yLabelXPos: Float,
+    yAxisXPos: Float,
 ) {
     val state = rememberSaveableChartState(
-        scrollOffset = scrollInit,
+        scrollOffset = scrollOffset,
         target = target.toFloat(),
         targetSet = targetSet,
         noOfVisibleBarCount = visibleBarCount,
@@ -144,23 +145,29 @@ internal fun BarChart(
             drawLine(
                 color = chartColor,
                 strokeWidth = chartStrokeWidth,
-                start = Offset(0f, chartHeight),
-                end = Offset(xAxisYOffset, chartHeight),
+                start = Offset(xLabelSpacing, chartHeight - yLabelSpacing),
+                end = Offset(xLabelSpacing + chartWidth, chartHeight - yLabelSpacing),
             )
             // draw y-axis line
             drawLine(
                 color = chartColor,
                 strokeWidth = chartStrokeWidth,
-                start = Offset(yAxisXOffset, 0f),
-                end = Offset(yAxisXOffset, chartHeight),
+                start = Offset(yAxisXPos + xLabelSpacing, 0f - yLabelSpacing),
+                end = Offset(yAxisXPos + xLabelSpacing, chartHeight - yLabelSpacing),
             )
 
             yLines.forEach { value: Float ->
                 drawLine(
                     color = chartColor,
                     strokeWidth = yLineStrokeWidth,
-                    start = Offset(0f, chartHeight - value * scaleFactor),
-                    end = Offset(xAxisYOffset, chartHeight - value * scaleFactor),
+                    start = Offset(
+                        0f + xLabelSpacing,
+                        chartHeight - yLabelSpacing - value * scaleFactor
+                    ),
+                    end = Offset(
+                        xLabelSpacing + chartWidth,
+                        chartHeight - yLabelSpacing - value * scaleFactor
+                    ),
                     pathEffect = PathEffect.dashPathEffect(
                         intervals = floatArrayOf(DASH_PATH_ON_INTERVAL, DASH_PATH_OFF_INTERVAL),
                         phase = DASH_PATH_PHASE_VALUE
@@ -171,8 +178,8 @@ internal fun BarChart(
                     textPaint.getTextBounds(text, 0, text.length, bounds)
                     it.nativeCanvas.drawText(
                         text,
-                        xPos,
-                        chartHeight - value * scaleFactor + bounds.height() / 2,
+                        yLabelXPos + xLabelSpacing,
+                        chartHeight - yLabelSpacing - value * scaleFactor + bounds.height() / 2,
                         textPaint
                     )
                 }
@@ -184,8 +191,8 @@ internal fun BarChart(
                     drawRoundRect(
                         color = barColor,
                         topLeft = Offset(
-                            xOffset + barOffset,
-                            chartHeight - bar.yValue.toFloat() * scaleFactor * animateFactor
+                            xLabelSpacing + xOffset + barOffset,
+                            chartHeight - yLabelSpacing - bar.yValue.toFloat() * scaleFactor * animateFactor
                         ),
                         size = Size(barWidth, bar.yValue.toFloat() * scaleFactor * animateFactor),
                         cornerRadius = barCornerRadius
@@ -194,8 +201,8 @@ internal fun BarChart(
                     drawRoundRect(
                         color = barColorLow,
                         topLeft = Offset(
-                            xOffset + barOffset,
-                            chartHeight - bar.yValue.toFloat() * scaleFactor * animateFactor
+                            xLabelSpacing + xOffset + barOffset,
+                            chartHeight - yLabelSpacing - bar.yValue.toFloat() * scaleFactor * animateFactor
 
                         ),
                         size = Size(barWidth, bar.yValue.toFloat() * scaleFactor * animateFactor),
@@ -208,8 +215,8 @@ internal fun BarChart(
                         textPaint.getTextBounds(text, 0, text.length, bounds)
                         it.nativeCanvas.drawText(
                             text,
-                            xOffset + barOffset + barWidth / 2,
-                            chartHeight - SPACING_SMALL - bar.yValue.toFloat() * scaleFactor,
+                            xLabelSpacing + xOffset + barOffset + barWidth / 2,
+                            chartHeight - yLabelSpacing - bar.yValue.toFloat() * scaleFactor,
                             textPaint
                         )
                     }
@@ -220,8 +227,8 @@ internal fun BarChart(
                     val textHeight = bounds.height()
                     it.nativeCanvas.drawText(
                         text,
-                        xOffset + barOffset + barWidth / 2,
-                        chartHeight + SPACING_MEDIUM + textHeight / 2,
+                        xLabelSpacing + xOffset + barOffset + barWidth / 2,
+                        chartHeight - yLabelSpacing + SPACING_MEDIUM + textHeight / 2,
                         textPaint
                     )
                 }

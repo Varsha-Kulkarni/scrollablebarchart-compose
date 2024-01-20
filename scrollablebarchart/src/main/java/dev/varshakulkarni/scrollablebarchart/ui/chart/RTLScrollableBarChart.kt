@@ -80,9 +80,11 @@ fun RTLScrollableBarChart(
 
     val width = chartSize.width().value - bounds.width()
     val height = chartSize.height().value - SPACING_LARGE
+    // scrolling should start just after the visible bars
     val scrollInit = remember {
         barChartDataCollection.barChartData.size.toFloat() - visibleBarCount
     }
+    // Y labels that appear behind the Y axis
     val yLabelXPos = remember { width + bounds.width() / 2 + SPACING_MEDIUM }
 
     BarChart(
@@ -101,10 +103,15 @@ fun RTLScrollableBarChart(
         target = target,
         targetSet = target != 0f,
         isAnimated = isAnimated,
-        scrollInit = scrollInit,
-        xPos = yLabelXPos,
+        scrollOffset = scrollInit,
+        yLabelXPos = yLabelXPos,
         barOffset = 0f,
-        yAxisXOffset = width,
-        xAxisYOffset = width,
+        xLabelSpacing = remember {
+            bounds.width() + SPACING_MEDIUM
+        },
+        yLabelSpacing = remember {
+            bounds.height() + SPACING_MEDIUM
+        },
+        yAxisXPos = width,
     )
 }

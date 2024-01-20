@@ -81,8 +81,9 @@ fun LTRScrollableBarChart(
 
     val width = chartSize.width().value - bounds.width()
     val height = chartSize.height().value - SPACING_LARGE
+    // The point from bars should start drawing on x axis
     val barOffset = remember { width / visibleBarCount - barWidth.value }
-    val xAxisYOffset = remember { width + barWidth.value }
+    // y labels that appear behind the y axis
     val yLabelXPos = remember { 0f - bounds.width() / 2 - SPACING_MEDIUM }
 
     BarChart(
@@ -101,10 +102,15 @@ fun LTRScrollableBarChart(
         target = target,
         targetSet = target != 0f,
         isAnimated = isAnimated,
-        scrollInit = 0f,
-        xPos = yLabelXPos,
+        scrollOffset = 0f,
+        xLabelSpacing = remember {
+            bounds.width() + SPACING_MEDIUM
+        },
+        yLabelSpacing = remember {
+            bounds.height() + SPACING_MEDIUM
+        },
         barOffset = barOffset,
-        yAxisXOffset = 0f,
-        xAxisYOffset = xAxisYOffset,
+        yAxisXPos = 0f,
+        yLabelXPos = yLabelXPos,
     )
 }
