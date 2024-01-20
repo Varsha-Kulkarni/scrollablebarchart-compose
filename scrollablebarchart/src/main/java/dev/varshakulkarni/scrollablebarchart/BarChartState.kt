@@ -16,7 +16,6 @@
 package dev.varshakulkarni.scrollablebarchart
 
 import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.TransformableState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -49,9 +48,11 @@ fun rememberSaveableChartState(
 }
 
 class BarChartState {
-    private var targetSet by mutableStateOf(false)
     private var viewWidth = 0f
     private var viewHeight = 0f
+
+    private var targetSet by mutableStateOf(false)
+
     var noVisibleBarCount by mutableStateOf(0)
     var target by mutableStateOf(0f)
     var yLinesCount by mutableStateOf(0)
@@ -61,8 +62,7 @@ class BarChartState {
 
     var showBarLabels by mutableStateOf(false)
 
-    val transformableState = TransformableState { zoomChange, _, _ -> scaleView(zoomChange) }
-
+    // Scrolling between bars beyond visible bars at any point should be within 0 and (total bars - (visiblebars - 1))
     val scrollableState = ScrollableState {
         scrollOffset = if (it > 0) {
             (scrollOffset - it.scrolledBars).coerceAtLeast(0f)
@@ -87,14 +87,7 @@ class BarChartState {
         }
     }
 
-    private fun scaleView(zoomChange: Float) {
-        if ((zoomChange < 1f) ||
-            (zoomChange > 1f)
-        ) {
-            visibleBarCount = (visibleBarCount / zoomChange).roundToInt()
-        }
-    }
-
+    // Ensure the bars are within the chart drawing area
     fun getScaleFactor(): Float {
         if (visibleBars.isNotEmpty()) {
             val maxY = visibleBars.maxWith(Comparator.comparing { it.yValue.toFloat() })
@@ -107,6 +100,7 @@ class BarChartState {
         return 0f
     }
 
+    // The Y lines (horizontal) we would like on the chart
     fun getYLines(): List<Float> {
         val yLineItem = target / yLinesCount
 
@@ -121,11 +115,6 @@ class BarChartState {
         viewWidth = width
         viewHeight = height
     }
-
-    fun xOffset(barData: BarChartData) =
-        viewWidth * visibleBars.indexOf(barData) / visibleBarCount
-
-    fun yOffset(value: Int) = value
 
     companion object {
         fun getState(
